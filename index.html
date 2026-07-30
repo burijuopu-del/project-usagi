@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Project Bunny</title>
+<meta name="description" content="Une infiltration commence... mais ce n'est peut-etre pas ce que tu crois." />
+
+<link rel="stylesheet" href="css/boot.css" />
+<link rel="stylesheet" href="css/terminal.css" />
+<link rel="stylesheet" href="css/animations.css" />
+<link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===== PHASE 1 : BOOT ===== -->
+  <div id="boot-screen">
+    <div id="boot-lines"></div>
+    <div id="boot-progress-wrap"><div id="boot-progress-bar"></div></div>
+    <button id="boot-skip">passer &gt;&gt;</button>
+  </div>
+
+  <!-- ===== PHASE 2-8 : TERMINAL ===== -->
+  <div id="terminal-screen">
+    <div id="terminal-topbar">
+      <div>
+        <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+        root@bunny — BUNNY-CORE v1.0
+      </div>
+      <div id="progress-meter">emotion [....]</div>
+    </div>
+    <div id="terminal-output"></div>
+    <div id="input-row">
+      <span id="prompt-label">root@bunny:~#</span>
+      <input type="text" id="terminal-input" autocomplete="off" autocapitalize="off" spellcheck="false" disabled />
+    </div>
+  </div>
+
+  <!-- ===== PHASE 8-9 : REVELATION FINALE ===== -->
+  <div id="reveal-screen">
+    <div id="reveal-status"></div>
+    <h1 id="reveal-title"></h1>
+    <h2 id="reveal-subtitle"></h2>
+    <div id="photo-gallery"></div>
+    <div id="music-controls"></div>
+    <div id="final-letter"></div>
+    <button id="transition-btn" style="display:none;">Continuer &rarr;</button>
+  </div>
+
+  <!-- Effets d'ambiance -->
+  <div id="scanlines"></div>
+  <div id="vignette"></div>
+  <div id="crt-flicker"></div>
+  <div id="blackout"></div>
+
+</div>
+
+<script>
+  // URL de destination finale (deuxieme site GitHub Pages).
+  // NOTE : remplace cette valeur par l'URL PUBLIQUE (GitHub Pages) du second site
+  // si l'adresse .git fournie ne correspond pas a la page live consultable dans un navigateur.
+  window.PB = window.PB || {};
+  window.PB.FINAL_REDIRECT_URL = "https://github.com/burijuopu-del/lwvo-lwvo.git";
+</script>
+
+<script src="js/save.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/filesystem.js"></script>
+<script src="js/puzzles.js"></script>
+<script src="js/story.js"></script>
+<script src="js/commands.js"></script>
+<script src="js/terminal.js"></script>
+<script src="js/boot.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    PB.updatePromptLabel();
+    document.getElementById('transition-btn').addEventListener('click', PB.beginFinalTransition);
+    PB.runBootSequence();
+  });
+</script>
+
+</body>
+</html>
