@@ -1,0 +1,9 @@
+{
+  "memories": [
+    { "id": "movie",   "title": "Souvenir : cinema",      "file": "/memory/movie.log" },
+    { "id": "rain",    "title": "Souvenir : la pluie",    "file": "/memory/rain.log" },
+    { "id": "music",   "title": "Souvenir : la musique",  "file": "/memory/music.db" },
+    { "id": "october", "title": "Souvenir : 1er octobre", "file": "/memory/october.txt" }
+  ],
+  "finalRedirect": "https://burijuopu-del.github.io/lwvo-lwvo/"
+}
