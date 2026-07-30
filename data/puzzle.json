@@ -1,0 +1,38 @@
+{
+  "morse": {
+    "source": ".- -.-. -.-. . ...",
+    "decoded": "ACCES",
+    "unlocks": "security",
+    "successMessage": "Signal decode : ACCES\nPrivilege increased.\nNouveau dossier disponible : /security"
+  },
+  "caesar": {
+    "source": "EXQQBFKDQ",
+    "shift": 3,
+    "decoded": "BUNNYCHAN",
+    "unlocks": "memory",
+    "successMessage": "Dechiffrement Cesar reussi : BUNNYCHAN\nPrivilege increased.\nNouveau dossier disponible : /memory"
+  },
+  "base64": {
+    "source": "QlVOTllDSEFO",
+    "decoded": "BUNNYCHAN",
+    "note": "Meme mot de passe que le chiffrement Cesar, obtenu par une autre methode : confirmation croisee."
+  },
+  "memoryAnalysis": {
+    "requiredMemories": ["movie", "rain", "music", "october"],
+    "command": "analyse",
+    "unlocks": "identity",
+    "successMessage": "Les 4 fragments memoire ont ete correles.\nTarget unknown -> Subject found.\nNouveau dossier disponible : /identity"
+  },
+  "logic": {
+    "question": "Ceux qui ___ sont pris pour fous par ceux qui n'entendent pas la ___.",
+    "answer": "dansent musique",
+    "unlocks": "project_bunny_solved",
+    "successMessage": "Reponse correcte.\n'Ceux qui dansent sont pris pour fous par ceux qui n'entendent pas la musique.'\nPrivilege increased. Acces a /restricted debloque."
+  },
+  "finalPassword": {
+    "question": "Quel est le surnom du sujet ? (minuscules, avec un tiret)",
+    "answer": "bunny-chan",
+    "unlocks": "final",
+    "successMessage": "Mot de passe accepte.\nDestination unlocked : /final"
+  }
+}
