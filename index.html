@@ -1,86 +1,2318 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<title>Project Usagi</title>
-<meta name="description" content="Une infiltration commence... mais ce n'est peut-etre pas ce que tu crois." />
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
 
-<link rel="stylesheet" href="css/boot.css" />
-<link rel="stylesheet" href="css/terminal.css" />
-<link rel="stylesheet" href="css/animations.css" />
-<link rel="stylesheet" href="css/responsive.css" />
+  <meta name="theme-color" content="#050706">
+
+  <title>Project Bunny</title>
+
+  <style>
+    :root {
+      --background: #030504;
+      --panel: rgba(4, 9, 7, 0.92);
+      --green: #77ff9c;
+      --green-soft: #35d869;
+      --green-dark: #143d22;
+      --white: #d9ffe3;
+      --muted: #73927b;
+      --danger: #ff6470;
+      --warning: #ffd166;
+      --shadow: 0 0 18px rgba(75, 255, 124, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      background: var(--background);
+      color: var(--green);
+      font-family:
+        "Courier New",
+        Courier,
+        monospace;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(24, 73, 38, 0.18),
+          transparent 62%
+        ),
+        #020403;
+    }
+
+    #app::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      opacity: 0.24;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(255, 255, 255, 0.025) 0,
+          rgba(255, 255, 255, 0.025) 1px,
+          transparent 1px,
+          transparent 4px
+        );
+    }
+
+    #app::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 21;
+      pointer-events: none;
+      box-shadow:
+        inset 0 0 120px rgba(0, 0, 0, 0.95),
+        inset 0 0 25px rgba(0, 0, 0, 0.9);
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #boot-screen {
+      z-index: 5;
+      padding:
+        max(20px, env(safe-area-inset-top))
+        max(18px, env(safe-area-inset-right))
+        max(20px, env(safe-area-inset-bottom))
+        max(18px, env(safe-area-inset-left));
+      overflow-y: auto;
+      background: #000;
+    }
+
+    #boot-output {
+      margin: 0;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: clamp(11px, 1.7vw, 15px);
+      line-height: 1.45;
+      text-shadow: 0 0 6px rgba(82, 255, 130, 0.35);
+    }
+
+    #skip-button {
+      position: fixed;
+      right: max(18px, env(safe-area-inset-right));
+      bottom: max(18px, env(safe-area-inset-bottom));
+      z-index: 30;
+      padding: 9px 13px;
+      border: 1px solid rgba(104, 255, 146, 0.4);
+      border-radius: 4px;
+      background: rgba(4, 10, 7, 0.84);
+      color: var(--muted);
+      cursor: pointer;
+      transition: 180ms ease;
+    }
+
+    #skip-button:hover,
+    #skip-button:focus-visible {
+      color: var(--green);
+      border-color: var(--green);
+      box-shadow: var(--shadow);
+      outline: none;
+    }
+
+    #terminal-screen {
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      background:
+        linear-gradient(
+          180deg,
+          rgba(8, 17, 11, 0.95),
+          rgba(1, 5, 3, 0.98)
+        );
+    }
+
+    .terminal-header {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 8px 14px;
+      border-bottom: 1px solid rgba(82, 255, 130, 0.16);
+      background: rgba(9, 15, 11, 0.92);
+      user-select: none;
+    }
+
+    .window-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    .window-dot.red {
+      background: #ff5f56;
+    }
+
+    .window-dot.yellow {
+      background: #ffbd2e;
+    }
+
+    .window-dot.green {
+      background: #27c93f;
+    }
+
+    .terminal-title {
+      margin-left: 7px;
+      color: #a7b7ab;
+      font-size: 12px;
+    }
+
+    #terminal-output {
+      flex: 1 1 auto;
+      margin: 0;
+      padding: 18px 18px 10px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: clamp(12px, 1.8vw, 15px);
+      line-height: 1.55;
+      scrollbar-color: var(--green-dark) transparent;
+    }
+
+    .terminal-line {
+      min-height: 1.4em;
+    }
+
+    .system-line {
+      color: var(--muted);
+    }
+
+    .success-line {
+      color: var(--green);
+    }
+
+    .warning-line {
+      color: var(--warning);
+    }
+
+    .error-line {
+      color: var(--danger);
+    }
+
+    .story-line {
+      color: var(--white);
+      text-shadow: 0 0 9px rgba(143, 255, 172, 0.28);
+    }
+
+    .input-area {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding:
+        11px
+        max(18px, env(safe-area-inset-right))
+        max(14px, env(safe-area-inset-bottom))
+        max(18px, env(safe-area-inset-left));
+      border-top: 1px solid rgba(82, 255, 130, 0.13);
+      background: rgba(2, 8, 4, 0.96);
+    }
+
+    #prompt {
+      flex: 0 0 auto;
+      color: var(--green-soft);
+      white-space: nowrap;
+    }
+
+    #command-input {
+      flex: 1 1 auto;
+      width: 100%;
+      padding: 4px 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--white);
+      caret-color: var(--green);
+      text-shadow: 0 0 5px rgba(82, 255, 130, 0.35);
+    }
+
+    #command-input:disabled {
+      opacity: 0.5;
+    }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0, 3, 1, 0.9);
+      backdrop-filter: blur(3px);
+    }
+
+    .overlay-card {
+      width: min(700px, 100%);
+      max-height: 85dvh;
+      overflow-y: auto;
+      padding: clamp(20px, 5vw, 42px);
+      border: 1px solid rgba(113, 255, 154, 0.36);
+      border-radius: 7px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(8, 21, 13, 0.98),
+          rgba(2, 8, 4, 0.99)
+        );
+      box-shadow:
+        0 0 50px rgba(71, 255, 122, 0.12),
+        inset 0 0 35px rgba(65, 255, 115, 0.03);
+      text-align: center;
+    }
+
+    .overlay-card h1 {
+      margin: 0 0 20px;
+      color: var(--white);
+      font-size: clamp(22px, 6vw, 42px);
+      letter-spacing: 0.08em;
+    }
+
+    .overlay-card p {
+      color: #a9c8b0;
+      line-height: 1.7;
+    }
+
+    .overlay-card button {
+      margin-top: 20px;
+      padding: 12px 22px;
+      border: 1px solid var(--green);
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      transition: 180ms ease;
+    }
+
+    .overlay-card button:hover,
+    .overlay-card button:focus-visible {
+      background: rgba(83, 255, 132, 0.1);
+      box-shadow: 0 0 25px rgba(83, 255, 132, 0.2);
+      outline: none;
+    }
+
+    .glitch {
+      animation: glitch 260ms steps(2, end) 3;
+    }
+
+    .shake {
+      animation: shake 300ms linear;
+    }
+
+    @keyframes glitch {
+      0% {
+        transform: translate(0);
+        filter: none;
+      }
+
+      20% {
+        transform: translate(-3px, 2px);
+        filter: hue-rotate(50deg);
+      }
+
+      40% {
+        transform: translate(4px, -1px);
+      }
+
+      60% {
+        transform: translate(-2px, -2px);
+        filter: contrast(1.6);
+      }
+
+      80% {
+        transform: translate(3px, 1px);
+      }
+
+      100% {
+        transform: translate(0);
+        filter: none;
+      }
+    }
+
+    @keyframes shake {
+      0%,
+      100% {
+        transform: translate(0);
+      }
+
+      25% {
+        transform: translate(-3px, 1px);
+      }
+
+      50% {
+        transform: translate(3px, -1px);
+      }
+
+      75% {
+        transform: translate(-2px, -1px);
+      }
+    }
+
+    @media (max-width: 650px) {
+      .terminal-header {
+        min-height: 38px;
+      }
+
+      #terminal-output {
+        padding: 14px 12px 8px;
+      }
+
+      .input-area {
+        gap: 5px;
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      #prompt {
+        font-size: 11px;
+      }
+
+      #command-input {
+        font-size: 13px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <main id="app">
+    <section id="boot-screen" class="screen" aria-label="Séquence de démarrage">
+      <pre id="boot-output"></pre>
 
-<div id="app">
+      <button id="skip-button" type="button">
+        PASSER
+      </button>
+    </section>
 
-  <!-- ===== PHASE 1 : BOOT ===== -->
-  <div id="boot-screen">
-    <div id="boot-lines"></div>
-    <div id="boot-progress-wrap"><div id="boot-progress-bar"></div></div>
-    <button id="boot-skip">passer &gt;&gt;</button>
-  </div>
+    <section
+      id="terminal-screen"
+      class="screen hidden"
+      aria-label="Terminal Project Bunny"
+    >
+      <header class="terminal-header">
+        <span class="window-dot red"></span>
+        <span class="window-dot yellow"></span>
+        <span class="window-dot green"></span>
 
-  <!-- ===== PHASE 2-8 : TERMINAL ===== -->
-  <div id="terminal-screen">
-    <div id="terminal-topbar">
-      <div>
-        <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
-        root@bunny — BUNNY-CORE v1.0
-      </div>
-      <div id="progress-meter">emotion [....]</div>
-    </div>
-    <div id="terminal-output"></div>
-    <div id="input-row">
-      <span id="prompt-label">root@bunny:~#</span>
-      <input type="text" id="terminal-input" autocomplete="off" autocapitalize="off" spellcheck="false" disabled />
-    </div>
-  </div>
+        <span class="terminal-title">
+          guest@project-bunny: ~
+        </span>
+      </header>
 
-  <!-- ===== PHASE 8-9 : REVELATION FINALE ===== -->
-  <div id="reveal-screen">
-    <div id="reveal-status"></div>
-    <h1 id="reveal-title"></h1>
-    <h2 id="reveal-subtitle"></h2>
-    <div id="photo-gallery"></div>
-    <div id="music-controls"></div>
-    <div id="final-letter"></div>
-    <button id="transition-btn" style="display:none;">Continuer &rarr;</button>
-  </div>
+      <div
+        id="terminal-output"
+        role="log"
+        aria-live="polite"
+        aria-label="Sortie du terminal"
+      ></div>
 
-  <!-- Effets d'ambiance -->
-  <div id="scanlines"></div>
-  <div id="vignette"></div>
-  <div id="crt-flicker"></div>
-  <div id="blackout"></div>
+      <form id="command-form" class="input-area" autocomplete="off">
+        <span id="prompt">guest@bunny:~$</span>
 
-</div>
+        <input
+          id="command-input"
+          type="text"
+          aria-label="Commande"
+          autocomplete="off"
+          autocapitalize="none"
+          spellcheck="false"
+        >
+      </form>
+    </section>
 
-<script>
-  // URL de destination finale (deuxieme site GitHub Pages).
-  // NOTE : remplace cette valeur par l'URL PUBLIQUE (GitHub Pages) du second site
-  // si l'adresse .git fournie ne correspond pas a la page live consultable dans un navigateur.
-  window.PB = window.PB || {};
-  window.PB.FINAL_REDIRECT_URL = "https://github.com/burijuopu-del/lwvo-lwvo.git";
-</script>
+    <section id="overlay" class="hidden">
+      <article class="overlay-card">
+        <h1 id="overlay-title">PROJECT BUNNY</h1>
+        <p id="overlay-text"></p>
+        <button id="overlay-button" type="button">
+          CONTINUER
+        </button>
+      </article>
+    </section>
+  </main>
 
-<script src="js/save.js"></script>
-<script src="js/effects.js"></script>
-<script src="js/filesystem.js"></script>
-<script src="js/puzzles.js"></script>
-<script src="js/story.js"></script>
-<script src="js/commands.js"></script>
-<script src="js/terminal.js"></script>
-<script src="js/boot.js"></script>
+  <script>
+    "use strict";
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    PB.updatePromptLabel();
-    document.getElementById('transition-btn').addEventListener('click', PB.beginFinalTransition);
-    PB.runBootSequence();
-  });
-</script>
+    /*
+      ============================================================
+      PROJECT BUNNY
+      Version monofichier pour GitHub Pages
+      ============================================================
+    */
 
+    const FINAL_SITE_URL =
+      "https://burijuopu-del.github.io/lwvo-lwvo/";
+
+    const STORAGE_KEY = "project_bunny_save_v1";
+
+    const app = document.getElementById("app");
+    const bootScreen = document.getElementById("boot-screen");
+    const bootOutput = document.getElementById("boot-output");
+    const skipButton = document.getElementById("skip-button");
+
+    const terminalScreen = document.getElementById("terminal-screen");
+    const terminalOutput = document.getElementById("terminal-output");
+    const commandForm = document.getElementById("command-form");
+    const commandInput = document.getElementById("command-input");
+    const promptElement = document.getElementById("prompt");
+
+    const overlay = document.getElementById("overlay");
+    const overlayTitle = document.getElementById("overlay-title");
+    const overlayText = document.getElementById("overlay-text");
+    const overlayButton = document.getElementById("overlay-button");
+
+    const state = {
+      bootCompleted: false,
+      stage: 0,
+      currentDirectory: "/home/guest",
+      accessLevel: 0,
+      terminalLocked: false,
+      commandHistory: [],
+      historyIndex: 0,
+      solved: {
+        identity: false,
+        cinema: false,
+        rain: false,
+        october: false,
+        final: false
+      }
+    };
+
+    const fileSystem = {
+      "/": {
+        type: "directory",
+        children: [
+          "bin",
+          "etc",
+          "home",
+          "var",
+          "opt",
+          "project_bunny"
+        ]
+      },
+
+      "/home": {
+        type: "directory",
+        children: ["guest"]
+      },
+
+      "/home/guest": {
+        type: "directory",
+        children: [
+          "README.txt",
+          "instructions.log",
+          ".signal"
+        ]
+      },
+
+      "/home/guest/README.txt": {
+        type: "file",
+        content:
+`PROJECT BUNNY RECOVERY CONSOLE
+
+Le système a détecté une archive incomplète.
+
+Objectif :
+1. Inspecter le système.
+2. Récupérer les fragments.
+3. Identifier le sujet.
+4. Restaurer la destination finale.
+
+Commande conseillée :
+ls`
+      },
+
+      "/home/guest/instructions.log": {
+        type: "file",
+        content:
+`[INSTRUCTION]
+Les commandes principales sont :
+
+help
+ls
+cd
+pwd
+cat
+tree
+whoami
+scan
+status
+clear
+history
+
+Les fichiers précédés d'un point sont cachés.
+Utilise : ls -la`
+      },
+
+      "/home/guest/.signal": {
+        type: "file",
+        access: 1,
+        content:
+`SIGNAL PARTIEL DÉTECTÉ
+
+Source : inconnue
+Alias possible : B-CHAN
+État : fragmenté
+
+Lancer :
+scan identity`
+      },
+
+      "/project_bunny": {
+        type: "directory",
+        children: [
+          "identity",
+          "memory",
+          "logs",
+          "restricted",
+          "final"
+        ]
+      },
+
+      "/project_bunny/identity": {
+        type: "directory",
+        access: 1,
+        children: [
+          "subject.enc",
+          "profile.dat"
+        ]
+      },
+
+      "/project_bunny/identity/subject.enc": {
+        type: "file",
+        access: 1,
+        content:
+`IDENTITY FRAGMENT
+
+Prénom : S██████
+Alias : Bunny-chan
+Type cognitif déclaré : INFP
+Intégrité : 41 %
+
+Commande requise :
+decrypt subject.enc`
+      },
+
+      "/project_bunny/identity/profile.dat": {
+        type: "file",
+        access: 2,
+        content:
+`IDENTITY RESTORED
+
+Prénom : Stephie
+Alias affectif : Bunny-chan
+Signature émotionnelle : stable
+Rôle dans le système : destination prioritaire
+
+STATUS : RECOGNIZED`
+      },
+
+      "/project_bunny/memory": {
+        type: "directory",
+        access: 2,
+        children: [
+          "cinema.log",
+          "rain.protocol",
+          "october.key",
+          "music.db"
+        ]
+      },
+
+      "/project_bunny/memory/cinema.log": {
+        type: "file",
+        access: 2,
+        content:
+`MEMORY 01 — CINEMA
+
+Sujet S :
+Préférence dominante : films d'horreur.
+
+Opérateur :
+Préférence dominante : thrillers et polars.
+
+Observation :
+Les différences n'ont pas interrompu la connexion.
+Elles ont créé un rituel d'alternance.
+
+Conclusion :
+Parfois ses films.
+Parfois les tiens.
+Toujours ensemble.
+
+Question d'intégrité :
+Quel genre de films Stephie préfère-t-elle ?
+
+Commande :
+answer horreur`
+      },
+
+      "/project_bunny/memory/rain.protocol": {
+        type: "file",
+        access: 2,
+        content:
+`MEMORY 02 — RAIN PROTOCOL
+
+Projet détecté :
+Danser sous la pluie.
+
+Référence associée :
+Ceux qui dansaient pouvaient sembler fous
+à ceux qui n'entendaient pas la musique.
+
+État :
+NON EXÉCUTÉ
+
+Probabilité de souvenir durable :
+99.98 %
+
+Commande requise :
+dance rain`
+      },
+
+      "/project_bunny/memory/october.key": {
+        type: "file",
+        access: 3,
+        content:
+`MEMORY 03 — ANNIVERSARY KEY
+
+Format attendu :
+jour mois
+
+Indice :
+Le système conserve le commencement
+dans le dixième mois de l'année.
+
+Commande :
+unlock october`
+      },
+
+      "/project_bunny/memory/music.db": {
+        type: "file",
+        access: 3,
+        content:
+`MEMORY 04 — MUSIC DATABASE
+
+Références reconnues :
+
+- The Book of Life
+- Manolo
+- "I Love You Too Much"
+- Dixzie Cruel — 4 U
+
+Aucune lecture automatique n'est activée.
+Le navigateur exige une interaction humaine,
+parce que même les machines doivent maintenant
+demander la permission avant d'avoir des émotions.`
+      },
+
+      "/project_bunny/logs": {
+        type: "directory",
+        children: [
+          "system.log",
+          "anomaly.log"
+        ]
+      },
+
+      "/project_bunny/logs/system.log": {
+        type: "file",
+        content:
+`[00:00:01] Kernel initialized.
+[00:00:02] Memory archive mounted.
+[00:00:04] Unknown emotional process detected.
+[00:00:06] Process classified as persistent.
+[00:00:08] Target recovery initiated.`
+      },
+
+      "/project_bunny/logs/anomaly.log": {
+        type: "file",
+        access: 2,
+        content:
+`ANOMALY REPORT
+
+The system was designed to recover data.
+
+It began recovering moments.
+
+The system was designed to identify a target.
+
+It began protecting her name.
+
+The system was designed to finish a mission.
+
+It refuses to terminate before finding Bunny-chan.`
+      },
+
+      "/project_bunny/restricted": {
+        type: "directory",
+        access: 3,
+        children: [
+          "truth.txt"
+        ]
+      },
+
+      "/project_bunny/restricted/truth.txt": {
+        type: "file",
+        access: 4,
+        content:
+`TRUTH RECOVERED
+
+Tu pensais chercher un secret.
+
+Mais le secret ne se cachait pas.
+
+Il attendait simplement que tu arrives.
+
+Le système n'a jamais essayé
+de pirater une machine.
+
+Il essayait de retrouver une personne.
+
+STEPHIE.
+BUNNY-CHAN.`
+      },
+
+      "/project_bunny/final": {
+        type: "directory",
+        access: 4,
+        children: [
+          "destination.sh"
+        ]
+      },
+
+      "/project_bunny/final/destination.sh": {
+        type: "file",
+        access: 4,
+        content:
+`FINAL DESTINATION READY
+
+Commande d'exécution :
+
+run destination.sh`
+      }
+    };
+
+    const bootSequence = [
+      {
+        text:
+`Project Bunny Secure BIOS v1.0.1
+Copyright (C) Memory Systems
+
+CPU: Virtual x86_64 Emotional Processing Unit
+Memory Test: 8192 MB OK
+Storage Controller: ONLINE
+Secure Boot: ENABLED
+
+`,
+        speed: 5,
+        pause: 320
+      },
+
+      {
+        text:
+`Scanning boot devices...
+Found encrypted partition: /dev/nvme0n1p3
+Loading GRUB 2.12...
+
+`,
+        speed: 8,
+        pause: 420
+      },
+
+      {
+        text:
+`GNU GRUB
+
+* Project Bunny Recovery Environment
+  Advanced recovery options
+  Memory integrity diagnostics
+
+Booting selected entry in 3 seconds...
+
+`,
+        speed: 4,
+        pause: 650
+      },
+
+      {
+        text:
+`Loading Linux 6.8.0-bunny-amd64...
+Loading initial ramdisk...
+Decompressing kernel...
+Booting the kernel.
+
+`,
+        speed: 3,
+        pause: 300
+      },
+
+      {
+        text:
+`[    0.000000] Linux version 6.8.0-bunny-amd64
+[    0.014821] Command line: quiet recovery emotional_archive=1
+[    0.087164] Memory: 7942M available
+[    0.191852] Initializing cgroup subsys cpuset
+[    0.328104] Mounting encrypted filesystem
+[  OK  ] Mounted /project_bunny
+[  OK  ] Started Network Manager
+[  OK  ] Started Secure Shell Service
+[  OK  ] Started Memory Reconstruction Engine
+[  OK  ] Reached target Multi-User System
+
+`,
+        speed: 2,
+        pause: 350
+      },
+
+      {
+        text:
+`Performing archive integrity check...
+
+[████░░░░░░░░░░░░░░░░] 20 %
+[████████░░░░░░░░░░░░] 40 %
+[████████████░░░░░░░░] 60 %
+[████████████████░░░░] 80 %
+[████████████████████] 100 %
+
+WARNING: Personal memory fragments detected.
+WARNING: Identity record incomplete.
+NOTICE : Manual intervention required.
+
+`,
+        speed: 4,
+        pause: 750
+      },
+
+      {
+        text:
+`Project Bunny Recovery Console
+
+Session opened for guest.
+Terminal access granted.
+
+`,
+        speed: 10,
+        pause: 500
+      }
+    ];
+
+    function sleep(milliseconds) {
+      return new Promise((resolve) => {
+        window.setTimeout(resolve, milliseconds);
+      });
+    }
+
+    function normalizePath(path) {
+      if (!path) {
+        return state.currentDirectory;
+      }
+
+      let resolvedPath = path;
+
+      if (!path.startsWith("/")) {
+        resolvedPath =
+          state.currentDirectory === "/"
+            ? `/${path}`
+            : `${state.currentDirectory}/${path}`;
+      }
+
+      const parts = resolvedPath.split("/");
+      const normalizedParts = [];
+
+      for (const part of parts) {
+        if (!part || part === ".") {
+          continue;
+        }
+
+        if (part === "..") {
+          normalizedParts.pop();
+          continue;
+        }
+
+        normalizedParts.push(part);
+      }
+
+      return `/${normalizedParts.join("/")}`;
+    }
+
+    function getNode(path) {
+      return fileSystem[normalizePath(path)] || null;
+    }
+
+    function hasAccess(node) {
+      const requiredAccess = Number(node?.access || 0);
+      return state.accessLevel >= requiredAccess;
+    }
+
+        function saveState() {
+      try {
+        const saveData = {
+          stage: state.stage,
+          currentDirectory: state.currentDirectory,
+          accessLevel: state.accessLevel,
+          solved: state.solved
+        };
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(saveData)
+        );
+      } catch (error) {
+        console.warn("Sauvegarde indisponible :", error);
+      }
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+
+        if (!saved) {
+          return;
+        }
+
+        const data = JSON.parse(saved);
+
+        if (Number.isFinite(data.stage)) {
+          state.stage = data.stage;
+        }
+
+        if (
+          typeof data.currentDirectory === "string" &&
+          fileSystem[data.currentDirectory]
+        ) {
+          state.currentDirectory = data.currentDirectory;
+        }
+
+        if (Number.isFinite(data.accessLevel)) {
+          state.accessLevel = data.accessLevel;
+        }
+
+        if (data.solved && typeof data.solved === "object") {
+          state.solved = {
+            ...state.solved,
+            ...data.solved
+          };
+        }
+      } catch (error) {
+        console.warn("Sauvegarde corrompue ignorée :", error);
+      }
+    }
+
+    function resetState() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        console.warn(error);
+      }
+
+      window.location.reload();
+    }
+
+    function getPromptPath() {
+      if (state.currentDirectory === "/home/guest") {
+        return "~";
+      }
+
+      return state.currentDirectory;
+    }
+
+    function updatePrompt() {
+      promptElement.textContent =
+        `guest@bunny:${getPromptPath()}$`;
+    }
+
+    function scrollTerminalToBottom() {
+      terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    }
+
+    function printLine(text = "", className = "") {
+      const line = document.createElement("div");
+      line.className = `terminal-line ${className}`.trim();
+      line.textContent = text;
+      terminalOutput.appendChild(line);
+      scrollTerminalToBottom();
+      return line;
+    }
+
+    function printBlock(text, className = "") {
+      const lines = String(text).split("\n");
+
+      for (const line of lines) {
+        printLine(line, className);
+      }
+    }
+
+    async function typeBootText(text, speed) {
+      for (const character of text) {
+        if (state.bootCompleted) {
+          return;
+        }
+
+        bootOutput.textContent += character;
+        bootScreen.scrollTop = bootScreen.scrollHeight;
+
+        if (character !== " " && character !== "\n") {
+          await sleep(speed);
+        }
+      }
+    }
+
+    async function runBootSequence() {
+      for (const section of bootSequence) {
+        if (state.bootCompleted) {
+          return;
+        }
+
+        await typeBootText(section.text, section.speed);
+
+        if (state.bootCompleted) {
+          return;
+        }
+
+        await sleep(section.pause);
+      }
+
+      openTerminal();
+    }
+
+    function openTerminal() {
+      if (state.bootCompleted) {
+        return;
+      }
+
+      state.bootCompleted = true;
+
+      bootScreen.classList.add("hidden");
+      terminalScreen.classList.remove("hidden");
+
+      updatePrompt();
+
+      printLine(
+        "Project Bunny Recovery Console v1.0",
+        "success-line"
+      );
+
+      printLine(
+        "Session restaurée. Tape « help » pour afficher les commandes.",
+        "system-line"
+      );
+
+      printLine("");
+
+      if (state.accessLevel > 0) {
+        printLine(
+          `[SAVE] Niveau d'accès restauré : ${state.accessLevel}`,
+          "system-line"
+        );
+      } else {
+        printLine(
+          "Conseil initial : cat README.txt",
+          "warning-line"
+        );
+      }
+
+      printLine("");
+
+      window.setTimeout(() => {
+        commandInput.focus();
+      }, 100);
+    }
+
+    function showOverlay(title, text, buttonText = "CONTINUER") {
+      overlayTitle.textContent = title;
+      overlayText.textContent = text;
+      overlayButton.textContent = buttonText;
+      overlay.classList.remove("hidden");
+    }
+
+    function hideOverlay() {
+      overlay.classList.add("hidden");
+      commandInput.focus();
+    }
+
+    function triggerGlitch() {
+      app.classList.remove("glitch");
+      void app.offsetWidth;
+      app.classList.add("glitch");
+
+      window.setTimeout(() => {
+        app.classList.remove("glitch");
+      }, 900);
+    }
+
+    function triggerShake() {
+      app.classList.remove("shake");
+      void app.offsetWidth;
+      app.classList.add("shake");
+
+      window.setTimeout(() => {
+        app.classList.remove("shake");
+      }, 400);
+    }
+
+    function requireAccess(node) {
+      if (hasAccess(node)) {
+        return true;
+      }
+
+      printLine(
+        `Permission denied. Niveau requis : ${node.access}`,
+        "error-line"
+      );
+
+      triggerShake();
+      return false;
+    }
+
+    function listDirectory(path, showHidden = false) {
+      const targetPath = normalizePath(path);
+      const node = fileSystem[targetPath];
+
+      if (!node) {
+        printLine(
+          `ls: impossible d'accéder à '${path}': Aucun fichier ou dossier`,
+          "error-line"
+        );
+        return;
+      }
+
+      if (!requireAccess(node)) {
+        return;
+      }
+
+      if (node.type !== "directory") {
+        printLine(targetPath.split("/").pop());
+        return;
+      }
+
+      const children = node.children || [];
+
+      const visibleChildren = children.filter((child) => {
+        return showHidden || !child.startsWith(".");
+      });
+
+      if (visibleChildren.length === 0) {
+        printLine("");
+        return;
+      }
+
+      for (const child of visibleChildren) {
+        const childPath =
+          targetPath === "/"
+            ? `/${child}`
+            : `${targetPath}/${child}`;
+
+        const childNode = fileSystem[childPath];
+        const suffix =
+          childNode?.type === "directory"
+            ? "/"
+            : "";
+
+        const accessMarker =
+          childNode?.access &&
+          state.accessLevel < childNode.access
+            ? " [LOCKED]"
+            : "";
+
+        printLine(
+          `${child}${suffix}${accessMarker}`,
+          childNode?.type === "directory"
+            ? "success-line"
+            : ""
+        );
+      }
+    }
+
+    function changeDirectory(path) {
+      const targetPath =
+        path === "~"
+          ? "/home/guest"
+          : normalizePath(path);
+
+      const node = fileSystem[targetPath];
+
+      if (!node) {
+        printLine(
+          `cd: ${path}: Aucun fichier ou dossier`,
+          "error-line"
+        );
+        return;
+      }
+
+      if (!requireAccess(node)) {
+        return;
+      }
+
+      if (node.type !== "directory") {
+        printLine(
+          `cd: ${path}: N'est pas un dossier`,
+          "error-line"
+        );
+        return;
+      }
+
+      state.currentDirectory = targetPath;
+      updatePrompt();
+      saveState();
+    }
+
+    function readFile(path) {
+      const targetPath = normalizePath(path);
+      const node = fileSystem[targetPath];
+
+      if (!node) {
+        printLine(
+          `cat: ${path}: Aucun fichier ou dossier`,
+          "error-line"
+        );
+        return;
+      }
+
+      if (!requireAccess(node)) {
+        return;
+      }
+
+      if (node.type !== "file") {
+        printLine(
+          `cat: ${path}: Ceci est un dossier`,
+          "error-line"
+        );
+        return;
+      }
+
+      printBlock(node.content, "story-line");
+    }
+
+    function printTree(path = state.currentDirectory, prefix = "") {
+      const targetPath = normalizePath(path);
+      const node = fileSystem[targetPath];
+
+      if (!node) {
+        printLine(
+          `tree: '${path}' introuvable`,
+          "error-line"
+        );
+        return;
+      }
+
+      if (!requireAccess(node)) {
+        return;
+      }
+
+      printLine(
+        targetPath,
+        node.type === "directory"
+          ? "success-line"
+          : ""
+      );
+
+      if (node.type !== "directory") {
+        return;
+      }
+
+      const children = node.children || [];
+
+      children.forEach((child, index) => {
+        const isLast = index === children.length - 1;
+
+        const childPath =
+          targetPath === "/"
+            ? `/${child}`
+            : `${targetPath}/${child}`;
+
+        const childNode = fileSystem[childPath];
+
+        const connector = isLast ? "└── " : "├── ";
+        const locked =
+          childNode?.access &&
+          state.accessLevel < childNode.access
+            ? " [LOCKED]"
+            : "";
+
+        printLine(
+          `${prefix}${connector}${child}${childNode?.type === "directory" ? "/" : ""}${locked}`
+        );
+      });
+    }
+
+    function showHelp() {
+      printBlock(
+`COMMANDES DISPONIBLES
+
+help                    Afficher cette aide
+ls                      Afficher les fichiers
+ls -la                   Afficher aussi les fichiers cachés
+cd <dossier>            Changer de dossier
+cd ..                   Revenir au dossier précédent
+pwd                     Afficher le chemin actuel
+cat <fichier>           Lire un fichier
+tree [chemin]           Afficher l'arborescence
+whoami                  Afficher l'identité de la session
+scan [cible]            Scanner le système
+decrypt <fichier>       Déchiffrer un fragment
+answer <réponse>        Répondre à une énigme
+dance rain              Exécuter le protocole pluie
+unlock october          Déverrouiller la date
+status                  Afficher la progression
+history                 Historique des commandes
+clear                   Nettoyer l'écran
+resume                  Afficher l'objectif suivant
+run destination.sh      Ouvrir la destination finale
+reset                   Effacer la progression`
+      );
+    }
+
+    async function scanSystem(target) {
+      if (state.terminalLocked) {
+        return;
+      }
+
+      state.terminalLocked = true;
+      commandInput.disabled = true;
+
+      const scanTarget = target || "filesystem";
+
+      printLine(
+        `Initialisation du scan : ${scanTarget}`,
+        "system-line"
+      );
+
+      const scanLines = [
+        "[██░░░░░░░░] 20 %",
+        "[████░░░░░░] 40 %",
+        "[██████░░░░] 60 %",
+        "[████████░░] 80 %",
+        "[██████████] 100 %"
+      ];
+
+      for (const line of scanLines) {
+        await sleep(240);
+        printLine(line, "system-line");
+      }
+
+      await sleep(300);
+
+      if (
+        scanTarget.toLowerCase() === "identity" ||
+        scanTarget.toLowerCase() === "subject"
+      ) {
+        if (state.accessLevel < 1) {
+          state.accessLevel = 1;
+          state.stage = Math.max(state.stage, 1);
+
+          triggerGlitch();
+
+          printLine(
+            "ANOMALIE IDENTITAIRE DÉTECTÉE.",
+            "warning-line"
+          );
+
+          printLine(
+            "Accès de niveau 1 accordé.",
+            "success-line"
+          );
+
+          printLine(
+            "Nouveau chemin : /project_bunny/identity",
+            "story-line"
+          );
+
+          printLine(
+            "Indice : cat /project_bunny/identity/subject.enc",
+            "system-line"
+          );
+        } else {
+          printLine(
+            "Identité déjà localisée.",
+            "system-line"
+          );
+        }
+      } else {
+        printLine(
+          "Partition inhabituelle détectée : /project_bunny",
+          "warning-line"
+        );
+
+        printLine(
+          "Un signal caché existe dans le dossier personnel.",
+          "system-line"
+        );
+
+        printLine(
+          "Indice : ls -la",
+          "success-line"
+        );
+      }
+
+      saveState();
+
+      state.terminalLocked = false;
+      commandInput.disabled = false;
+      commandInput.focus();
+    }
+
+    async function decryptFile(fileName) {
+      const cleanName = fileName.trim();
+
+      if (!cleanName) {
+        printLine(
+          "decrypt: fichier manquant",
+          "error-line"
+        );
+        return;
+      }
+
+      const targetPath = normalizePath(cleanName);
+      const node = fileSystem[targetPath];
+
+      if (!node) {
+        printLine(
+          `decrypt: ${cleanName}: fichier introuvable`,
+          "error-line"
+        );
+        return;
+      }
+
+      if (!requireAccess(node)) {
+        return;
+      }
+
+      if (!targetPath.endsWith("subject.enc")) {
+        printLine(
+          "Aucun chiffrement reconnu sur ce fichier.",
+          "warning-line"
+        );
+        return;
+      }
+
+      if (state.solved.identity) {
+        printLine(
+          "Le fragment d'identité est déjà restauré.",
+          "system-line"
+        );
+        return;
+      }
+
+      state.terminalLocked = true;
+      commandInput.disabled = true;
+
+      printLine(
+        "Lecture de la signature cryptographique...",
+        "system-line"
+      );
+
+      await sleep(450);
+
+      printLine(
+        "Utilisation de la clé : BUNNY_PROTOCOL",
+        "system-line"
+      );
+
+      await sleep(550);
+
+      printLine(
+        "Déchiffrement en cours...",
+        "system-line"
+      );
+
+      await sleep(650);
+
+      triggerGlitch();
+
+      state.solved.identity = true;
+      state.accessLevel = Math.max(state.accessLevel, 2);
+      state.stage = Math.max(state.stage, 2);
+
+      printLine(
+        "DECRYPTION SUCCESSFUL",
+        "success-line"
+      );
+
+      printLine("");
+
+      printBlock(
+`IDENTITY RESTORED
+
+Prénom : Stephie
+Alias : Bunny-chan
+Profil : INFP
+Statut : PERSONNE RECHERCHÉE`,
+        "story-line"
+      );
+
+      printLine("");
+
+      printLine(
+        "Accès de niveau 2 accordé.",
+        "success-line"
+      );
+
+      printLine(
+        "Archive mémoire disponible : /project_bunny/memory",
+        "system-line"
+      );
+
+      saveState();
+
+      state.terminalLocked = false;
+      commandInput.disabled = false;
+      commandInput.focus();
+    }
+
+    function answerPuzzle(answer) {
+      const normalizedAnswer = answer
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+      if (
+        ["horreur", "films d'horreur", "film d'horreur"].includes(
+          normalizedAnswer
+        )
+      ) {
+        if (state.solved.cinema) {
+          printLine(
+            "Mémoire cinéma déjà validée.",
+            "system-line"
+          );
+          return;
+        }
+
+        state.solved.cinema = true;
+        state.stage = Math.max(state.stage, 3);
+
+        printLine(
+          "RÉPONSE VALIDÉE.",
+          "success-line"
+        );
+
+        printBlock(
+`Fragment restauré :
+
+Elle aime les films d'horreur.
+Tu préfères les thrillers et les polars.
+
+Le système conclut que vos différences
+ne vous éloignent pas.
+
+Elles vous donnent simplement
+davantage de mondes à partager.`,
+          "story-line"
+        );
+
+        printLine(
+          "Prochain fragment : rain.protocol",
+          "system-line"
+        );
+
+        saveState();
+        return;
+      }
+
+      printLine(
+        "Réponse incorrecte ou énigme indisponible.",
+        "error-line"
+      );
+    }
+
+    function executeRainProtocol() {
+      if (!state.solved.cinema) {
+        printLine(
+          "Le protocole pluie dépend du fragment cinéma.",
+          "error-line"
+        );
+        return;
+      }
+
+      if (state.solved.rain) {
+        printLine(
+          "RAIN PROTOCOL déjà synchronisé.",
+          "system-line"
+        );
+        return;
+      }
+
+      state.solved.rain = true;
+      state.accessLevel = Math.max(state.accessLevel, 3);
+      state.stage = Math.max(state.stage, 4);
+
+      triggerGlitch();
+
+      printLine(
+        "RAIN PROTOCOL INITIALIZED",
+        "success-line"
+      );
+
+      printLine("");
+
+      printBlock(
+`Simulation :
+
+Pluie détectée.
+Musique intérieure détectée.
+Deux silhouettes attendent l'exécution.
+
+Certains pourraient les croire folles.
+
+Le système sait seulement
+qu'ils n'entendent pas la musique.`,
+        "story-line"
+      );
+
+      printLine("");
+
+      printLine(
+        "Accès de niveau 3 accordé.",
+        "success-line"
+      );
+
+      printLine(
+        "Nouvelle clé disponible : october.key",
+        "system-line"
+      );
+
+      saveState();
+    }
+
+    function unlockOctober() {
+      if (!state.solved.rain) {
+        printLine(
+          "Séquence précédente incomplète.",
+          "error-line"
+        );
+        return;
+      }
+
+      if (state.solved.october) {
+        printLine(
+          "La clé du 1er octobre est déjà active.",
+          "system-line"
+        );
+        return;
+      }
+
+      showOverlay(
+        "ANNIVERSARY KEY",
+        "Entre la date importante dans le terminal sous la forme : date 1 octobre",
+        "RETOURNER AU TERMINAL"
+      );
+
+      state.stage = Math.max(state.stage, 5);
+      saveState();
+    }
+
+    function validateDate(dateText) {
+      const normalized = dateText
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+      const validDates = [
+        "1 octobre",
+        "01 octobre",
+        "1/10",
+        "01/10",
+        "1-10",
+        "01-10"
+      ];
+
+      if (!validDates.includes(normalized)) {
+        printLine(
+          "Clé temporelle incorrecte.",
+          "error-line"
+        );
+        return;
+      }
+
+      if (state.solved.october) {
+        printLine(
+          "Clé temporelle déjà restaurée.",
+          "system-line"
+        );
+        return;
+      }
+
+      state.solved.october = true;
+      state.accessLevel = Math.max(state.accessLevel, 4);
+      state.stage = Math.max(state.stage, 6);
+
+      triggerGlitch();
+
+      printLine(
+        "TEMPORAL KEY ACCEPTED",
+        "success-line"
+      );
+
+      printLine("");
+
+      printBlock(
+`DATE RESTAURÉE
+
+01 OCTOBRE
+
+Classification :
+Commencement d'une histoire.
+
+Valeur système :
+Impossible à convertir en nombre.
+
+Raison :
+Certains événements ne se mesurent pas.
+Ils deviennent des repères.`,
+        "story-line"
+      );
+
+      printLine("");
+
+      printLine(
+        "Accès de niveau 4 accordé.",
+        "success-line"
+      );
+
+      printLine(
+        "Fichier vérité disponible : /project_bunny/restricted/truth.txt",
+        "system-line"
+      );
+
+      saveState();
+    }
+
+    function showStatus() {
+      const completed = [
+        state.solved.identity,
+        state.solved.cinema,
+        state.solved.rain,
+        state.solved.october,
+        state.solved.final
+      ].filter(Boolean).length;
+
+      printBlock(
+`PROJECT BUNNY STATUS
+
+Niveau d'accès : ${state.accessLevel}/4
+Progression : ${completed}/5 fragments
+
+Identité : ${state.solved.identity ? "RESTAURÉE" : "INCOMPLÈTE"}
+Cinéma : ${state.solved.cinema ? "RESTAURÉ" : "INCOMPLET"}
+Pluie : ${state.solved.rain ? "SYNCHRONISÉE" : "INACTIVE"}
+1er octobre : ${state.solved.october ? "DÉVERROUILLÉ" : "VERROUILLÉ"}
+Destination : ${state.solved.final ? "OUVERTE" : "FERMÉE"}`
+      );
+    }
+
+    function showResume() {
+      if (state.accessLevel === 0) {
+        printLine(
+          "Lis README.txt, puis inspecte les fichiers cachés avec ls -la.",
+          "warning-line"
+        );
+        return;
+      }
+
+      if (!state.solved.identity) {
+        printLine(
+          "Objectif : decrypt /project_bunny/identity/subject.enc",
+          "warning-line"
+        );
+        return;
+      }
+
+      if (!state.solved.cinema) {
+        printLine(
+          "Objectif : cat /project_bunny/memory/cinema.log",
+          "warning-line"
+        );
+        return;
+      }
+
+      if (!state.solved.rain) {
+        printLine(
+          "Objectif : cat /project_bunny/memory/rain.protocol",
+          "warning-line"
+        );
+        return;
+      }
+
+      if (!state.solved.october) {
+        printLine(
+          "Objectif : cat /project_bunny/memory/october.key",
+          "warning-line"
+        );
+        return;
+      }
+
+      printLine(
+        "Objectif final : cat /project_bunny/restricted/truth.txt",
+        "warning-line"
+      );
+
+      printLine(
+        "Puis : run /project_bunny/final/destination.sh",
+        "warning-line"
+      );
+    }
+
+        async function runDestination(fileName) {
+      const normalizedFileName = fileName
+        .trim()
+        .replace(/^\.?\//, "");
+
+      if (
+        !normalizedFileName.endsWith("destination.sh")
+      ) {
+        printLine(
+          `run: ${fileName || "fichier manquant"}: exécution refusée`,
+          "error-line"
+        );
+        return;
+      }
+
+      if (!state.solved.october || state.accessLevel < 4) {
+        printLine(
+          "Destination verrouillée. Archives incomplètes.",
+          "error-line"
+        );
+        return;
+      }
+
+      if (state.terminalLocked) {
+        return;
+      }
+
+      state.terminalLocked = true;
+      commandInput.disabled = true;
+
+      printLine(
+        "Exécution de destination.sh...",
+        "system-line"
+      );
+
+      await sleep(500);
+
+      printLine(
+        "Vérification de l'identité : Stephie",
+        "system-line"
+      );
+
+      await sleep(500);
+
+      printLine(
+        "Alias reconnu : Bunny-chan",
+        "success-line"
+      );
+
+      await sleep(600);
+
+      printLine(
+        "Assemblage des souvenirs...",
+        "system-line"
+      );
+
+      await sleep(700);
+
+      printLine(
+        "Ouverture du tunnel sécurisé...",
+        "system-line"
+      );
+
+      await sleep(700);
+
+      triggerGlitch();
+
+      printLine(
+        "TRANSFER COMPLETE",
+        "success-line"
+      );
+
+      printLine(
+        "DESTINATION UNLOCKED",
+        "story-line"
+      );
+
+      state.solved.final = true;
+      state.stage = 7;
+      saveState();
+
+      await sleep(900);
+
+      showOverlay(
+        "IDENTITY RESTORED",
+        "Stephie. Bunny-chan. Le système n'essayait pas de trouver un fichier. Il essayait de te retrouver.",
+        "OUVRIR LA DESTINATION"
+              );
+
+      overlayButton.dataset.action = "redirect";
+    }
+
+    async function executeCommand(rawCommand) {
+      const command = rawCommand.trim();
+
+      if (!command) {
+        return;
+      }
+
+      state.commandHistory.push(command);
+      state.historyIndex = state.commandHistory.length;
+
+      printLine(
+        `${promptElement.textContent} ${command}`,
+        "success-line"
+      );
+
+      const parts = command.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+      const baseCommand = (parts.shift() || "").toLowerCase();
+
+      const args = parts.map((item) => {
+        return item.replace(/^"(.*)"$/, "$1");
+      });
+
+      switch (baseCommand) {
+        case "help":
+          showHelp();
+          break;
+
+        case "ls": {
+          const showHidden = args.includes("-la") || args.includes("-a");
+          const pathArgument = args.find((arg) => !arg.startsWith("-"));
+          listDirectory(pathArgument || state.currentDirectory, showHidden);
+          break;
+        }
+
+        case "cd":
+          changeDirectory(args[0] || "/home/guest");
+          break;
+
+        case "pwd":
+          printLine(state.currentDirectory);
+          break;
+
+        case "cat":
+          if (!args[0]) {
+            printLine(
+              "cat: opérande manquant",
+              "error-line"
+            );
+          } else {
+            readFile(args.join(" "));
+          }
+          break;
+
+        case "tree":
+          printTree(args[0] || state.currentDirectory);
+          break;
+
+        case "whoami":
+          if (state.accessLevel < 2) {
+            printLine("guest");
+          } else if (state.accessLevel < 4) {
+            printLine("authorized_visitor");
+          } else {
+            printLine("someone_she_was_meant_to_find");
+          }
+          break;
+
+        case "scan":
+          await scanSystem(args.join(" "));
+          break;
+
+        case "decrypt":
+          await decryptFile(args.join(" "));
+          break;
+
+        case "answer":
+          answerPuzzle(args.join(" "));
+          break;
+
+        case "dance":
+          if ((args[0] || "").toLowerCase() === "rain") {
+            executeRainProtocol();
+          } else {
+            printLine(
+              "Usage : dance rain",
+              "error-line"
+            );
+          }
+          break;
+
+        case "unlock":
+          if ((args[0] || "").toLowerCase() === "october") {
+            unlockOctober();
+          } else {
+            printLine(
+              "Usage : unlock october",
+              "error-line"
+            );
+          }
+          break;
+
+        case "date":
+          validateDate(args.join(" "));
+          break;
+
+        case "status":
+          showStatus();
+          break;
+
+        case "resume":
+        case "objectif":
+          showResume();
+          break;
+
+        case "history":
+          state.commandHistory.forEach((item, index) => {
+            printLine(`${index + 1}  ${item}`);
+          });
+          break;
+
+        case "clear":
+          terminalOutput.innerHTML = "";
+          break;
+
+        case "run":
+        case "bash":
+        case "sh":
+          await runDestination(args.join(" "));
+          break;
+
+        case "love":
+          if (state.accessLevel < 4) {
+            printLine(
+              "love: command not found",
+              "error-line"
+            );
+          } else {
+            printLine(
+              "Command found.",
+              "success-line"
+            );
+
+            printLine(
+              "Some processes were never errors.",
+              "story-line"
+            );
+          }
+          break;
+
+        case "sudo":
+          printLine(
+            "guest is not in the sudoers file. This incident will be reported.",
+            "error-line"
+          );
+          break;
+
+        case "ip":
+          if ((args[0] || "") === "a") {
+            printBlock(
+`1: lo: <LOOPBACK,UP>
+    inet 127.0.0.1/8
+
+2: bunny0: <BROADCAST,MULTICAST,UP>
+    inet 10.1.10.1/24
+    state CONNECTED
+    alias memory-tunnel`
+            );
+          } else {
+            printLine(
+              "Usage simulé : ip a",
+              "error-line"
+            );
+          }
+          break;
+
+        case "hostnamectl":
+          printBlock(
+` Static hostname: project-bunny
+       Icon name: computer-vm
+         Chassis: vm
+      Machine ID: BUNNY-CHAN-1001
+Operating System: Project Bunny Linux
+          Kernel: Linux 6.8.0-bunny-amd64
+    Architecture: x86-64`
+          );
+          break;
+
+        case "journalctl":
+          readFile("/project_bunny/logs/system.log");
+          break;
+
+        case "reset":
+          resetState();
+          break;
+
+        default:
+          printLine(
+            `${baseCommand}: command not found`,
+            "error-line"
+          );
+      }
+
+      printLine("");
+    }
+
+    commandForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (state.terminalLocked) {
+        return;
+            }
+            const command = commandInput.value;
+      commandInput.value = "";
+
+      await executeCommand(command);
+    });
+
+    commandInput.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+
+        if (state.commandHistory.length === 0) {
+          return;
+        }
+
+        state.historyIndex = Math.max(
+          0,
+          state.historyIndex - 1
+        );
+
+        commandInput.value =
+          state.commandHistory[state.historyIndex] || "";
+
+        window.setTimeout(() => {
+          commandInput.setSelectionRange(
+            commandInput.value.length,
+            commandInput.value.length
+          );
+        }, 0);
+      }
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+
+        if (state.commandHistory.length === 0) {
+          return;
+        }
+
+        state.historyIndex = Math.min(
+          state.commandHistory.length,
+          state.historyIndex + 1
+        );
+
+        commandInput.value =
+          state.commandHistory[state.historyIndex] || "";
+      }
+
+      if (event.key === "Tab") {
+        event.preventDefault();
+
+        const value = commandInput.value.trim();
+
+        const suggestions = [
+          "help",
+          "ls -la",
+          "cat README.txt",
+          "scan identity",
+          "status",
+          "resume",
+          "tree /project_bunny"
+        ];
+
+        const match = suggestions.find((item) => {
+          return item.startsWith(value);
+        });
+
+        if (match) {
+          commandInput.value = match;
+        }
+      }
+    });
+
+    skipButton.addEventListener("click", () => {
+      openTerminal();
+    });
+
+    terminalScreen.addEventListener("click", () => {
+      commandInput.focus();
+    });
+
+    overlayButton.addEventListener("click", () => {
+      if (overlayButton.dataset.action === "redirect") {
+        window.location.href = FINAL_SITE_URL;
+        return;
+      }
+
+      hideOverlay();
+    });
+
+    window.addEventListener("error", (event) => {
+      console.error("Project Bunny error :", event.error);
+
+      if (!terminalScreen.classList.contains("hidden")) {
+        printLine(
+          `[SYSTEM ERROR] ${event.message}`,
+          "error-line"
+        );
+      }
+    });
+
+    function initializeProject() {
+      loadState();
+      runBootSequence();
+    }
+
+    initializeProject();
+  </script>
 </body>
 </html>
+    
